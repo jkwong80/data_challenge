@@ -4,11 +4,13 @@
     No attempt yet to do anything smart about the running median calculation.
 
 """
-import os, sys
-import datetime, time
-from calendar import timegm
+import sys
+import time
+
 import numpy as np
-import lib.helpers
+
+import helpers
+
 
 def main(input_fullfilename, zip_fullfilename, date_fullfilename):
 
@@ -36,8 +38,8 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
 
             for lineIn in fid:
                 # lineIn = fid.readline()
-                entry = lib.helpers.ParseLine(lineIn)
-                process_mask = lib.helpers.CheckEntry(entry)
+                entry = helpers.ParseLine(lineIn)
+                process_mask = helpers.CheckEntry(entry)
 
                 if line_number % DISPLAY_INTERVAL == 0:
                     report_index = line_number / DISPLAY_INTERVAL
@@ -80,9 +82,9 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                     # Calculate the median
                     # (This is the function I would modify (along the data structures) if I wanted to
                     # use faster running median calculators)
-                    trans_median, trans_total, trans_number = lib.helpers.CalculateTransactionValues(dat_zip[id][zip])
+                    trans_median, trans_total, trans_number = helpers.CalculateTransactionValues(dat_zip[id][zip])
 
-                    lineOut = lib.helpers.CreateZipOutputString(trans_median, trans_total, trans_number, entry)
+                    lineOut = helpers.CreateZipOutputString(trans_median, trans_total, trans_number, entry)
                     # print(lineOut)
                     fid_zip.write(lineOut)
                 else:
@@ -121,7 +123,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
             date_list = dat_date[id_write].keys()
 
             # Convert to epoch times
-            epoch_list = [lib.helpers.ConvertTransactionDateToEpochGM(dtt) for dtt in date_list]
+            epoch_list = [helpers.ConvertTransactionDateToEpochGM(dtt) for dtt in date_list]
             date_list_arg_sort  = np.argsort(epoch_list)
 
             for index_ordered in date_list_arg_sort:
@@ -129,9 +131,9 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                 date_str = date_list[index_ordered]
                 # calculate the median, total, # values
                 trans_median, trans_total, trans_number = \
-                    lib.helpers.CalculateTransactionValues(dat_date[id_write][date_str])
+                    helpers.CalculateTransactionValues(dat_date[id_write][date_str])
 
-                lineOut = lib.helpers.CreateDateOutputString(id_write, date_str, trans_median, trans_total, trans_number)
+                lineOut = helpers.CreateDateOutputString(id_write, date_str, trans_median, trans_total, trans_number)
                 # print(lineOut)
                 fid_dt.write(lineOut)
 

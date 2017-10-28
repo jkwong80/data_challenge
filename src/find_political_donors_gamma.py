@@ -4,11 +4,13 @@
 
 
 """
-import os, sys
-import datetime, time
+import sys
+import time
+
 import numpy as np
+
 # import my helpers
-import lib.helpers
+import helpers
 
 line_number_display = 500000
 
@@ -41,7 +43,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                 iter_time = time.time()
 
                 # lineIn = fid.readline()
-                entry = lib.helpers.ParseLine(lineIn)
+                entry = helpers.ParseLine(lineIn)
 
                 ##################################
                 if line_number == line_number_display:
@@ -49,7 +51,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                     print(time.time()  - iter_time)
                     iter_time = time.time()
 
-                process_mask = lib.helpers.CheckEntry(entry)
+                process_mask = helpers.CheckEntry(entry)
 
                 ##################################
                 if line_number == line_number_display:
@@ -97,7 +99,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
 
                     # See if this is the first time encountering this zip,       for this id
                     if zip not in dat_zip[id]:
-                        dat_zip[id][zip] = lib.helpers.ZipStreaming()
+                        dat_zip[id][zip] = helpers.ZipStreaming()
 
                     # now we are ready to the transaction amount to the list
                     # ??float or int
@@ -109,7 +111,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                     # use faster running median calculators)
                     # trans_median, trans_total, trans_number = lib.helpers.CalculateTransactionValues(dat_zip[id][zip])
 
-                    lineOut = lib.helpers.CreateZipOutputString(trans_median, trans_total, trans_number, entry)
+                    lineOut = helpers.CreateZipOutputString(trans_median, trans_total, trans_number, entry)
                     # print(lineOut)
                     fid_zip.write(lineOut)
                 else:
@@ -166,7 +168,7 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
             date_list = dat_date[id_write].keys()
 
             # Convert to epoch times
-            epoch_list = [lib.helpers.ConvertTransactionDateToEpochGM(dtt) for dtt in date_list]
+            epoch_list = [helpers.ConvertTransactionDateToEpochGM(dtt) for dtt in date_list]
             date_list_arg_sort  = np.argsort(epoch_list)
 
             for index_ordered in date_list_arg_sort:
@@ -174,9 +176,9 @@ def main(input_fullfilename, zip_fullfilename, date_fullfilename):
                 date_str = date_list[index_ordered]
                 # calculate the median, total, # values
                 trans_median, trans_total, trans_number = \
-                    lib.helpers.CalculateTransactionValues(dat_date[id_write][date_str])
+                    helpers.CalculateTransactionValues(dat_date[id_write][date_str])
 
-                lineOut = lib.helpers.CreateDateOutputString(id_write, date_str, trans_median, trans_total, trans_number)
+                lineOut = helpers.CreateDateOutputString(id_write, date_str, trans_median, trans_total, trans_number)
                 # print(lineOut)
                 fid_dt.write(lineOut)
 

@@ -75,7 +75,7 @@ The directory structure for your repo should look like this:
 
 
 # Installation
-To install the requisite packages, run `./setup.sh`.  This requires Python and pip.
+To install the requisite packages, run `./setup.sh`.  This requires Python and pip and should take around a minute complete.
 
 # Running Tests
 I have several unit tests for testing out the various helper functions and classes.  They are located in `/src/tests/test_lib_helpers.py`.
@@ -84,12 +84,37 @@ To run the tests:
 
 `./run_unit_tests.sh`
 
-```
 If all the tests pass, the final output should look like this:
+
+```
 
 ----------------------------------------------------------------------
 Ran 14 tests in 2.222s
 ```
+
+
+To run my script for generating the `medianvals_by_zip.txt` and `medianvals_by_date.txt` files, run `./run.sh`.  You should see an output like this:
+
+```
+Line 100000, time elapsed: 3.457, time since last report: 3.455, rate: 28940.210 Hz
+Line 200000, time elapsed: 6.838, time since last report: 3.381, rate: 29578.606 Hz
+Line 300000, time elapsed: 9.914, time since last report: 3.075, rate: 32517.806 Hz
+Line 400000, time elapsed: 13.323, time since last report: 3.410, rate: 29326.169 Hz
+Line 500000, time elapsed: 17.596, time since last report: 4.273, rate: 23402.909 Hz
+...
+...
+Line 3900000, time elapsed: 118.217, time since last report: 1.210, rate: 82638.747 Hz
+Line 4000000, time elapsed: 121.584, time since last report: 3.366, rate: 29704.522 Hz
+Line 4100000, time elapsed: 123.249, time since last report: 1.665, rate: 60048.118 Hz
+Line 4200000, time elapsed: 125.006, time since last report: 1.756, rate: 56937.364 Hz
+zip file - number of entries skipped: 1997341
+date file - number of entries skipped: 1992947
+Writing: ./output/medianvals_by_date.txt
+All done.
+```
+
+The values displayed from left to right: the current line number, the time elapsed since the start of the script, the time since last update, and the rate at which the lines are being processed.  Note that the rate flucuates greatly because of variance in the number of lines being thrown out.  
+
 
 # Description of Approach
 

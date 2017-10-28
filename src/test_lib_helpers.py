@@ -1,12 +1,23 @@
 #!/usr/bin/env python
+"""
+Unit tests for the helper functions of helpers.py.  The unittest of the Python Standard Library is used.
+The user is expected to run run_unit_tests.sh at the base of the repository in order to run these tests.
 
+Note that this this file was originally in /src/tests but has been moved as I was uncertain about whether or not
+subdirectories were allowed for the /src folder
+
+
+"""
+import os
+import sys
+import time
 import unittest
-import os, sys, time
+
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
-import lib.helpers
+import helpers
 
 
 # some zips for the t
@@ -40,25 +51,25 @@ class TestZipCodeHelpers(unittest.TestCase):
 
     def test_CheckZipCode_good_zip(self):
         """
-        Test a good zip code
+        Test a good zip code.
         :return:
         """
-        self.assertTrue(lib.helpers.CheckZipCode(good_zip), 'Incorrectly classified good zip ({})'.format(good_zip))
+        self.assertTrue(helpers.CheckZipCode(good_zip), 'Incorrectly classified good zip ({})'.format(good_zip))
 
     def test_CheckZipCode_wrong_number_digits(self):
         """
-        Test a zip code with wrong number of digits
+        Test a zip code with wrong number of digits.
         :return:
         """
-        self.assertFalse(lib.helpers.CheckZipCode(wrong_number_digits),
+        self.assertFalse(helpers.CheckZipCode(wrong_number_digits),
                         'Did not catch wrong number of digits ({})'.format(wrong_number_digits))
 
     def test_CheckZipCode_malformed(self):
         """
-        Test a zip code with non-numeric characters
+        Test a zip code with non-numeric characters.
         :return:
         """
-        self.assertFalse(lib.helpers.CheckZipCode('a8928'), 'Did not catch malformed zip ({})'.format(malformed_zip))
+        self.assertFalse(helpers.CheckZipCode('a8928'), 'Did not catch malformed zip ({})'.format(malformed_zip))
 
 
 
@@ -75,7 +86,7 @@ class TestTransactionDateHelpers(unittest.TestCase):
         """
         print('Testing CheckTransactionDate')
 
-        results = [lib.helpers.CheckTransactionDate(good_date) for good_date in good_dates_list]
+        results = [helpers.CheckTransactionDate(good_date) for good_date in good_dates_list]
         for i in xrange(len(results)):
             print('{}) {} is {}'.format(i, good_dates_list[i], results[i]))
         self.assertTrue(len(good_dates_list) == sum(results), 'Did not classify all good dates as good.')
@@ -88,7 +99,7 @@ class TestTransactionDateHelpers(unittest.TestCase):
         """
         print('Testing CheckTransactionDate')
 
-        self.assertFalse( lib.helpers.CheckTransactionDate(short_date),\
+        self.assertFalse(helpers.CheckTransactionDate(short_date),\
                           'Did not classify a short date as bad ({}).'.format(short_date))
 
     def test_CheckTransactionDate_long_date(self):
@@ -96,7 +107,7 @@ class TestTransactionDateHelpers(unittest.TestCase):
         Check a date that is too long
         :return:
         """
-        self.assertFalse( lib.helpers.CheckTransactionDate(long_date),\
+        self.assertFalse(helpers.CheckTransactionDate(long_date),\
                           'Did not classify a short date as bad ({}).'.format(long_date))
 
     def test_CheckTransactionDate_wrong_characters_date(self):
@@ -104,7 +115,7 @@ class TestTransactionDateHelpers(unittest.TestCase):
         Check a date with non-numeric characters
         :return:
         """
-        self.assertFalse( lib.helpers.CheckTransactionDate(wrong_characters_date),\
+        self.assertFalse(helpers.CheckTransactionDate(wrong_characters_date),\
                           'Did not classifier a date with non-numeric characters as bad ({}).'.format(wrong_characters_date))
 
 
@@ -113,14 +124,14 @@ class TestTransactionDateHelpers(unittest.TestCase):
         Check a date with invalid month
         :return:
         """
-        self.assertFalse( lib.helpers.CheckTransactionDate(invalid_month_date),\
+        self.assertFalse(helpers.CheckTransactionDate(invalid_month_date),\
                           'Did not classify a date with invalid month as bad ({}).'.format(invalid_month_date))
     def test_CheckTransactionDate_invalid_day_date(self):
         """
         Check a date with invalid day
         :return:
         """
-        self.assertFalse( lib.helpers.CheckTransactionDate(invalid_day_date),\
+        self.assertFalse(helpers.CheckTransactionDate(invalid_day_date),\
                           'Did not classify a date with invalid day as bad ({}).'.format(invalid_day_date))
 
 
@@ -141,7 +152,7 @@ class TestParseLine(unittest.TestCase):
 
         print('Testing ParseLine')
 
-        results = [lib.helpers.ParseLine(entries[i]) == expected_parsed_values[i] for i in xrange(len(entries))]
+        results = [helpers.ParseLine(entries[i]) == expected_parsed_values[i] for i in xrange(len(entries))]
 
         for i in xrange(len(results)):
             print('{}) {} parsed propely: {}'.format(i, entries[i], results[i]))
@@ -169,7 +180,7 @@ class TestMedianStreaming(unittest.TestCase):
 
         running_medians = np.zeros(NUMBER_VALUES)
 
-        median_streaming = lib.helpers.MedianStreaming()
+        median_streaming = helpers.MedianStreaming()
 
         for i in xrange(len(integers_list)):
             running_medians[i] = median_streaming.ingest(integers_list[i])
@@ -194,7 +205,7 @@ class TestMedianStreaming(unittest.TestCase):
 
         running_medians = np.zeros(NUMBER_VALUES)
 
-        median_streaming = lib.helpers.MedianStreaming()
+        median_streaming = helpers.MedianStreaming()
 
         for i in xrange(len(integers_list)):
             running_medians[i] = median_streaming.ingest(integers_list[i])
@@ -241,7 +252,7 @@ class TestMedianStreaming(unittest.TestCase):
 
         # with class that uses heaps
         algo_name = 'with_heaps'
-        median_streaming = lib.helpers.MedianStreaming()
+        median_streaming = helpers.MedianStreaming()
         t_start = time.time()
 
         for i in xrange(NUMBER_VALUES):
@@ -304,7 +315,7 @@ class TestZipStreaming(unittest.TestCase):
 
         # with class that uses heaps
         algo_name = 'with_heaps'
-        zip_streaming = lib.helpers.ZipStreaming()
+        zip_streaming = helpers.ZipStreaming()
         t_start = time.time()
 
         for i in xrange(NUMBER_VALUES):
