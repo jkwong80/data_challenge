@@ -50,7 +50,7 @@ def ConvertTransactionDateToEpochGM(date_input):
     except:
         return -1
 
-def ParseLine(line_in, return_subset = True):
+def ParseLine(line_in):
     """
 
     :param line_in:
@@ -88,7 +88,6 @@ def ParseLineOLD(line_in, return_subset = True):
     return entry
 
 
-
 def CheckEntry(entry):
     """
 
@@ -111,9 +110,6 @@ def CheckEntry(entry):
     process_mask[1] = CheckTransactionDate(entry['TRANSACTION_DT'])
 
     return process_mask
-
-
-
 
 
 def CalculateTransactionValues(values):
@@ -161,7 +157,9 @@ class MedianStreaming(object):
         Class for calculate median of a stream of incoming values, injested one at a time.
         Note that this is not for calculating the median of a finite window size of streaming
         values.
-        This is very simple to use.  You just injest a value and it returns the new median value.
+        This is very simple to use.  You just ingest a value and it returns the new median value.
+
+        10/27/2017, John Kwong
 
     """
 
@@ -171,6 +169,11 @@ class MedianStreaming(object):
         self.median_current = 0
 
     def ingest(self, input):
+        """
+
+        :param input:
+        :return:  the new median value
+        """
         if len(self.left_heap) > len(self.right_heap):
             if input < self.median_current:
                 # heapq.heappush(self.right_heap, self.left_heap.pop(-1))
@@ -204,30 +207,47 @@ class MedianStreaming(object):
         return(self.median_current)
 
     def reset(self):
-        self.self.left_heap = []
-        self.self.right_heap = []
-        self.self.median_current = 0
-        self.median_new = None
+        self.left_heap = []
+        self.right_heap = []
+        self.median_current = 0
 
 
 
 class ZipStreaming(MedianStreaming):
-    def __init__(self):
+    """
+        Class specifically for generating the median, total contributions and number of contributions for
+        streaming contribution values.
 
+    """
+    def __init__(self):
         MedianStreaming.__init__(self)
         self.total = 0
         self.count = 0
 
     def ingest(self, input):
+        """
+        The contribution values are ingested with this method.
+
+        :param input:  the contriubtion value
+        :return:  tuple of current median, total contributions, number of contributions
+        """
         MedianStreaming.ingest(self,input)
         self.total += input
         self.count += 1
         return self.median_current, self.total, self.count
 
     def GetTotal(self):
+        """
+        Get the total contributions.
+        :return:   total contributions (sum)
+        """
         return(self.total)
 
     def GetCount(self):
+        """
+        Get the number of contributions
+        :return:   number of contributions
+        """
         return(self.count)
 
 
