@@ -6,7 +6,6 @@
 5. [Running Tests](README.md#running-tests)
 6. [Description of Approach](README.md#description-of-approach)
 7. [Discussion](README.md#discussion)
-8. [Conclusion](README.md#conclusion)
 
 # Introduction
 
@@ -25,18 +24,21 @@ The fields on each pipe-delimited line of `medianvals_by_date.txt` should be dat
 
 Also, unlike the first output file, every line in the `medianvals_by_date.txt` file should be represented by a unique combination of day and recipient -- there should be no duplicates."
 
+
 # Description of the Repository
 
 
-The directory structure for your repo should look like this:
+Repository Structure
 
 	.
 	├── README.md
 	├── input
 	│   ├── README.md
-	│   ├── itcont.txt
-	│   ├── itcont_2016_full.txt
-	│   └── itcont_short.txt
+	│   └── itcont.txt
+	├── output
+	│   ├── README.md
+	│   ├── medianvals_by_date.txt
+	│   └── medianvals_by_zip.txt
 	├── insight_testsuite
 	│   ├── results.txt
 	│   ├── run_tests.sh
@@ -49,33 +51,46 @@ The directory structure for your repo should look like this:
 	│               ├── medianvals_by_date.txt
 	│               └── medianvals_by_zip.txt
 	├── install.sh
-	├── output
-	│   ├── README.md
-	│   ├── medianvals_by_date.txt
-	│   └── medianvals_by_zip.txt
-	├── requirements.txt
 	├── run.sh
 	├── run_unit_tests.sh
-	├── setup.sh
-	├── src
+	├── create_plots.sh
+	├── requirements.txt
+	└── src
 	    ├── README.md
 	    ├── __init__.py
-	    ├── benchmarks.py
-	    ├── explore_data_file.py
 	    ├── find_political_donors_beta.py
-	    ├── find_political_donors_delta.py
 	    ├── find_political_donors_gamma.py
-	    ├── lib
-	    │   ├── __init__.py
-	    │   ├── helpers.py
-	    ├── streaming_median.py
-	    └── tests
-	        ├── __init__.py
-	        └── test_lib_helpers.py
+	    ├── find_political_donors_delta.py
+	    ├── helpers.py
+	    ├── test_lib_helpers.py
+	    └── benchmark_median.py
 
+Description of the important files:
+
+* `install.sh` - installs dependencies
+* `run.sh` - runs my python script for creating the two txt files
+* `run_unit_tests.sh ` - runs unit tests
+* `requirements.txt ` - pip install list of packages
+* `find_political_donors_delta.py ` - my main script for generating the txt files
+* `helpers.py ` - helper functions and classes used by find_political_donors_delta.py
+* `test_lib_helpers.py ` - unit tests
+* `benchmark_median.py` - make some benchmark plots comparing two methods of calculating medians
+* `create_plots.sh` - runs `benchmark_median.py`; this is optional
+
+# Requirements
+
+Running this package requires the following
+
+* Python 2.7 and pip python manager.  It will probably work with Python 3 but it has not been tested.
+* Ubuntu or OS X.  My script will probably work as is in Windows but this has not been tested.
+* Python packages as listed in the requirements.txt file
+	* Numpy
+	* Matplotlib (if you wish to make some of the diagnostic plots)
+
+If you have installed Anaconda Python distribution, then my script should work without no further installations.  I recommend using [virtual environments](https://virtualenv.pypa.io/en/stable) to segment your Python environments but that is beyond the scope of this document.  I also recommend using the outstanding virtual environment manager, [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/).
 
 # Installation
-To install the requisite packages, run `./setup.sh`.  This requires Python and pip and should take around a minute complete.
+To install the requisite packages, run `./setup.sh`.  This requires Python and pip and should take around a minute to complete.
 
 # Running Tests
 I have several unit tests for testing out the various helper functions and classes.  They are located in `/src/tests/test_lib_helpers.py`.
@@ -93,7 +108,7 @@ Ran 14 tests in 2.222s
 ```
 
 
-To run my script for generating the `medianvals_by_zip.txt` and `medianvals_by_date.txt` files, run `./run.sh`.  You should see an output like this:
+Run `./run.sh`, to run my script for generating the `medianvals_by_zip.txt` and `medianvals_by_date.txt` files.  You should see an output like this:
 
 ```
 Line 100000, time elapsed: 3.457, time since last report: 3.455, rate: 28940.210 Hz
@@ -113,14 +128,49 @@ Writing: ./output/medianvals_by_date.txt
 All done.
 ```
 
-The values displayed from left to right: the current line number, the time elapsed since the start of the script, the time since last update, and the rate at which the lines are being processed.  Note that the rate flucuates greatly because of variance in the number of lines being thrown out.  
+Every 100,000 lines processed, it will display a report.  The report values from left to right: the current line number, the time elapsed since the start of the script, the time since last update, and the rate at which the lines are being processed.  Note that the rate flucuates greatly because of variance in the number of lines being thrown out.  
 
+Run `create_plots.sh` to create some png of plots comparing two methods of calculating the median values. I describe the methods in a later section.
 
 # Description of Approach
 
-One of the concerns I had was the calculation of the running median and the dynamically changing structures needed to store an indefinite number of id’s, zip codes and datas.  After, some experimentation, I convinced myself that having expanding lists to hold contributions really isn’t a concern.  This shouldn’t be a surprises as appending an element to a list is a O(1) (amortized) operation.  The running median is fairly fast on a modern computer with the built-in numpy function (np.median) but for larger arrays, it becomes significant and, given the significant number of computations that are expected to occur, it should be optimized. Nonetheless, I constructed my first version of main function using a list for each combination of id and zip code and using np.median to calculate the value every time a contribution value is appended.  This is expected to be slow as this function must resort the entire list.  The time to process the 2016 dataset (828.8 MB; 4,206,727 lines) is about 330 seconds.
-Next, I wrote a simple algorithm that maintains two sorted lists of contributions for values, one for values above the median and another for those below.  This is accomplished by using two min heaps (one of the heaps should be a max heap but the min heap operates as such by making the values negative.)  This change cuts the run time on the 2016 dataset by about 40% to 170 seconds.  Next I made some miscellaneous improvements to my helper functions which parse the lines from the input text file.  This resulted in an additional ~24% reduction in the processing time (60% reduction from the naive approach) to 130 seconds.
+## Data Structures
+I decided to use a dict of dict to hold the contribution values for the _date file, organized by id and transaction date:
+	
+	dat_date[id][date] = []
+
+where `[]` is a list.  I used a similar structure to hold the transaction values for the _zip file:
+	
+	dat_zip[id][zip] = []
+
+For this data structure, I had the dicts also hold a list but then converted to having it store instances of a class designed to calculate medians on streaming values.  This is described in the next section.
+
+## Pseudocode
+
+	for line from File:
+		parse the line
+		determine if should process for _zip and _date files
+		if process for _zip file
+			if first time seeing id and zip
+				add container (or class instance) to store amount
+			add amount to container
+			calculate _zip values
+			write to _zip file
+		if process for _date file
+			if first time seeing id and date
+				add container to store amount
+			add amount to container
+	write to _date file
+			
+
+I had two concerns: the calculation of the running median and the dynamically changing structures needed to store an indefinite number of id’s, zip codes and datas.  After, some experimentation, I convinced myself that using expanding lists in dicts of dicts to hold the contributions is not a concern.  This should not be a surprise as expanding a dictionary and appending an element to a list are O(1) (amortized) operations.  The numpy median functions is fairly fast on modern computers but for larger arrays, it becomes significant.  For example, it takes 140ms to find median of 1M floats on an i5-7360U CPU.  Given the significant number of computations that are expected to occur, it should be optimized.  To serve as a baseline, I constructed my first version of the script using a list for each combination of id and zip code and using numpy.median to calculate the value every time a contribution value is appended.  This is expected to be slow as this function must resort the entire list everytime.  The time to process the 2016 dataset (828.8 MB; 4,206,727 lines) is about 330 seconds.
+Next, I wrote a simple algorithm that maintains two sorted lists of contributions for values, one for values above the median and another for those below.  This is accomplished by using two min heaps (one of the heaps should be a max heap but the min heap operates as such by making the values negative). This change cuts the run time on the 2016 dataset by about 40% to 170 seconds.  Next, I made some miscellaneous improvements to my helper functions for reading and parsing the input.  This resulted in an additional ~24% reduction in the processing time to 130 seconds (60% reduction from the naive approach).
+
 
 # Discussion
+There is definitely room for improvement.
+These are some of the things I would try if I had more time
 
-# Conclusion
+* Try to write median algorithm that takes the advantage of the fact that number of unique contribution values is small.  For example, the number of unique values in the first 20,000 entries is ~750.  The contribution with the highest frequency (~10%) is $250.  We can 
+
+* Try to write an algorithm that estimates the median by tracking the distribution of the incoming values in a running histogram instead of retaining all the values.  This, of course, does not solve the problems presented here but would nonetheless be interesting to try out.
